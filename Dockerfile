@@ -36,13 +36,28 @@ RUN case ${TARGETPLATFORM} in \
     printf "Building OAuth2 Proxy for arch ${GOARCH}\n" && \
     VERSION=${VERSION} make build && touch jwt_signing_key.pem
 
-# Copy binary to alpine
-FROM alpine:3.14
+# Copy binary to debian-python3.9 image
+FROM python:3.9-buster
 COPY nsswitch.conf /etc/nsswitch.conf
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /go/src/github.com/oauth2-proxy/oauth2-proxy/oauth2-proxy /bin/oauth2-proxy
 COPY --from=builder /go/src/github.com/oauth2-proxy/oauth2-proxy/jwt_signing_key.pem /etc/ssl/private/jwt_signing_key.pem
+# copy app related files
+COPY app /app
 
-USER 2000:2000
+WORKDIR /app
+# install streamlit
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["/bin/oauth2-proxy"]
+# optmize streamlit for prodcution
+ENV STREAMLIT_SERVER_HEADLESS true
+ENV STREAMLIT_SERVER_FILE_WATCHER_TYPE none
+
+# setup supervisor to run the proxy
+# RUN apt-get update && apt-get install -y supervisor
+# RUN mkdir -p /var/log/supervisor
+#COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chmod 755 docker-entrypoint.sh
+
+# run the demo app
+ENTRYPOINT [ "./docker-entrypoint.sh" ]

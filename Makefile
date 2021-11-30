@@ -4,7 +4,8 @@ GOLANGCILINT ?= golangci-lint
 BINARY := oauth2-proxy
 VERSION ?= $(shell git describe --always --dirty --tags 2>/dev/null || echo "undefined")
 # Allow to override image registry.
-REGISTRY ?= quay.io/oauth2-proxy
+REGISTRY ?= axelvanraes
+IMAGE_NAME ?= oauth2-proxy-streamlit
 .NOTPARALLEL:
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
@@ -46,31 +47,31 @@ DOCKER_BUILDX := docker buildx build ${DOCKER_BUILDX_ARGS} --platform ${DOCKER_B
 
 .PHONY: docker
 docker:
-	$(DOCKER_BUILDX) -f Dockerfile -t $(REGISTRY)/oauth2-proxy:latest .
+	$(DOCKER_BUILDX) -f Dockerfile -t $(REGISTRY)/${IMAGE_NAME}:latest .
 
 .PHONY: docker-all
 docker-all: docker
-	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/oauth2-proxy:latest-amd64 .
-	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/oauth2-proxy:${VERSION} .
-	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/oauth2-proxy:${VERSION}-amd64 .
-	$(DOCKER_BUILD) -f Dockerfile.arm64 -t $(REGISTRY)/oauth2-proxy:latest-arm64 .
-	$(DOCKER_BUILD) -f Dockerfile.arm64 -t $(REGISTRY)/oauth2-proxy:${VERSION}-arm64 .
-	$(DOCKER_BUILD) -f Dockerfile.armv6 -t $(REGISTRY)/oauth2-proxy:latest-armv6 .
-	$(DOCKER_BUILD) -f Dockerfile.armv6 -t $(REGISTRY)/oauth2-proxy:${VERSION}-armv6 .
+	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/${IMAGE_NAME}:latest-amd64 .
+	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/${IMAGE_NAME}:${VERSION} .
+	$(DOCKER_BUILD) -f Dockerfile -t $(REGISTRY)/${IMAGE_NAME}:${VERSION}-amd64 .
+	$(DOCKER_BUILD) -f Dockerfile.arm64 -t $(REGISTRY)/${IMAGE_NAME}:latest-arm64 .
+	$(DOCKER_BUILD) -f Dockerfile.arm64 -t $(REGISTRY)/${IMAGE_NAME}:${VERSION}-arm64 .
+	$(DOCKER_BUILD) -f Dockerfile.armv6 -t $(REGISTRY)/${IMAGE_NAME}:latest-armv6 .
+	$(DOCKER_BUILD) -f Dockerfile.armv6 -t $(REGISTRY)/${IMAGE_NAME}:${VERSION}-armv6 .
 
 .PHONY: docker-push
 docker-push:
-	docker buildx build --push --platform ${DOCKER_BUILD_PLATFORM} -t $(REGISTRY)/oauth2-proxy:latest .
+	docker buildx build --push --platform ${DOCKER_BUILD_PLATFORM} -t $(REGISTRY)/${IMAGE_NAME}:latest .
 
 .PHONY: docker-push-all
 docker-push-all: docker-push
-	docker push $(REGISTRY)/oauth2-proxy:latest-amd64
-	docker push $(REGISTRY)/oauth2-proxy:${VERSION}
-	docker push $(REGISTRY)/oauth2-proxy:${VERSION}-amd64
-	docker push $(REGISTRY)/oauth2-proxy:latest-arm64
-	docker push $(REGISTRY)/oauth2-proxy:${VERSION}-arm64
-	docker push $(REGISTRY)/oauth2-proxy:latest-armv6
-	docker push $(REGISTRY)/oauth2-proxy:${VERSION}-armv6
+	docker push $(REGISTRY)/${IMAGE_NAME}:latest-amd64
+	docker push $(REGISTRY)/${IMAGE_NAME}:${VERSION}
+	docker push $(REGISTRY)/${IMAGE_NAME}:${VERSION}-amd64
+	docker push $(REGISTRY)/${IMAGE_NAME}:latest-arm64
+	docker push $(REGISTRY)/${IMAGE_NAME}:${VERSION}-arm64
+	docker push $(REGISTRY)/${IMAGE_NAME}:latest-armv6
+	docker push $(REGISTRY)/${IMAGE_NAME}:${VERSION}-armv6
 
 .PHONY: generate
 generate:
