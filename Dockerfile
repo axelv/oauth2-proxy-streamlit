@@ -2,7 +2,7 @@
 #  cache sharing of the go mod download step.
 # Go cross compilation is also faster than emulation the go compilation across
 #  multiple platforms.
-FROM --platform=${BUILDPLATFORM} golang:1.16-buster AS builder
+FROM --platform=linux/amd64 golang:1.16-buster AS builder
 
 # Copy sources
 WORKDIR $GOPATH/src/github.com/oauth2-proxy/oauth2-proxy
@@ -28,11 +28,7 @@ ARG BUILDPLATFORM
 #  in app.yaml instead.
 # Set the cross compilation arguments based on the TARGETPLATFORM which is
 #  automatically set by the docker engine.
-RUN case ${TARGETPLATFORM} in \
-         "linux/amd64")  GOARCH=amd64  ;; \
-         "linux/arm64")  GOARCH=arm64  ;; \
-         "linux/arm/v6") GOARCH=arm GOARM=6  ;; \
-    esac && \
+RUN GOARCH=amd64 \
     printf "Building OAuth2 Proxy for arch ${GOARCH}\n" && \
     VERSION=${VERSION} make build && touch jwt_signing_key.pem
 
