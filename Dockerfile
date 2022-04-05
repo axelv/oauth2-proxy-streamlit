@@ -17,8 +17,6 @@ COPY . .
 # Arguments go here so that the previous steps can be cached if no external
 #  sources have changed.
 ARG VERSION
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
 
 # Build binary and make sure there is at least an empty key file.
 #  This is useful for GCP App Engine custom runtime builds, because
